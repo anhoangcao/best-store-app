@@ -1,24 +1,134 @@
 ﻿using BestStoreMVC.Models;
 using BestStoreMVC.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace BestStoreMVC.Controllers
 {
+    [Route("/Admin/[controller]/{action=Index}/{id?}")]
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext context;
         private readonly IWebHostEnvironment environment;
-
+        private readonly int pageSize = 5;
         public ProductsController(ApplicationDbContext context, IWebHostEnvironment environment)
         {
             this.context = context;
             this.environment = environment;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int pageIndex, string? search, string? column, string? orderBy)
         {
-            var products = context.Products.OrderByDescending(p => p.Id).ToList(); // Sắp xếp id theo thứ tự giảm dần
+            IQueryable<Product> query = context.Products;
+
+            // search functionality
+            if (search != null)
+            {
+                query = query.Where(p => p.Name.Contains(search) || p.Brand.Contains(search));
+            }
+
+            // sort functionality
+            string[] validColumns = { "Id", "Name", "Brand", "Category", "Price", "CreatedAt" };
+            string[] validOrderBy = { "desc", "asc" };
+
+            if (!validColumns.Contains(column))
+            {
+                column = "Id";
+            }
+
+            if (!validOrderBy.Contains(orderBy))
+            {
+                orderBy = "desc";
+            }
+
+            if (column == "Name")
+            {
+                if (orderBy == "asc")
+                {
+                    query = query.OrderBy(p => p.Name);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Name);
+                }
+            }
+            else if (column == "Brand")
+            {
+                if (orderBy == "asc")
+                {
+                    query = query.OrderBy(p => p.Brand);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Brand);
+                }
+            }
+            else if (column == "Category")
+            {
+                if (orderBy == "asc")
+                {
+                    query = query.OrderBy(p => p.Category);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Category);
+                }
+            }
+            else if (column == "Price")
+            {
+                if (orderBy == "asc")
+                {
+                    query = query.OrderBy(p => p.Price);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Price);
+                }
+            }
+            else if (column == "CreatedAt")
+            {
+                if (orderBy == "asc")
+                {
+                    query = query.OrderBy(p => p.CreatedAt);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.CreatedAt);
+                }
+            }
+            else
+            {
+                if (orderBy == "asc")
+                {
+                    query = query.OrderBy(p => p.Id);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Id);
+                }
+            }
+
+            // query = query.OrderByDescending(p => p.Id);
+
+            // pagination functionality
+            if (pageIndex < 1)
+            {
+                pageIndex = 1;
+            }
+
+            decimal count = query.Count();
+            int totalPages = (int)Math.Ceiling(count / pageSize);
+            query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+
+            var products = query.ToList();
+
+            ViewData["PageIndex"] = pageIndex;
+            ViewData["TotalPages"] = totalPages;
+
+            ViewData["Search"] = search ?? "";
+
+            ViewData["Column"] = column;
+            ViewData["OrderBy"] = orderBy;
+
             return View(products);
         }
 
