@@ -13,8 +13,7 @@ namespace BestStoreMVC.Services
             var apiInstance = new TransactionalEmailsApi();
             SendSmtpEmailSender Email = new SendSmtpEmailSender(senderName, senderEmail);
             SendSmtpEmailTo smtpEmailTo = new SendSmtpEmailTo(toEmail, toName);
-            List<SendSmtpEmailTo> To = new List<SendSmtpEmailTo>();
-            To.Add(smtpEmailTo);
+            List<SendSmtpEmailTo> To = new List<SendSmtpEmailTo> { smtpEmailTo };
 
             try
             {

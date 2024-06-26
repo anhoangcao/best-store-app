@@ -262,25 +262,80 @@ namespace BestStoreMVC.Controllers
 
             if (user != null)
             {
-                // generate password reset token
                 var token = await userManager.GeneratePasswordResetTokenAsync(user);
                 string resetUrl = Url.ActionLink("ResetPassword", "Account", new { token }) ?? "URL Error";
 
-                // send url by email
                 string senderName = configuration["BrevoSettings:SenderName"] ?? "";
                 string senderEmail = configuration["BrevoSettings:SenderEmail"] ?? "";
                 string username = user.FirstName + " " + user.LastName;
                 string subject = "Password Reset";
-                string message = "Dear " + username + ",\n\n" +
-                                 "You can reset your password using the following link:\n\n" +
-                                 resetUrl + "\n\n" +
+                string message = $"Dear {username},\n\n" +
+                                 $"You can reset your password using the following link:\n\n" +
+                                 $"{resetUrl}\n\n" +
                                  "Best Regards";
-                EmailSender.SendEmail(senderName, senderEmail, username, email, subject, message);
+                EmailSender.SendEmail(senderName, senderEmail, username, email, message, subject);
             }
 
             ViewBag.SuccessMessage = "Please check your Email account and click on the Password Reset link!";
 
             return View();
         }
+
+        public IActionResult ResetPassword(string? token)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (token == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(string? token, PasswordResetDto model)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (token == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = "Token not valid!";
+                return View(model);
+            }
+
+            var result = await userManager.ResetPasswordAsync(user, token, model.Password);
+            if (result.Succeeded)
+            {
+                ViewBag.SuccessMessage = "Password reset successfully!";
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+            }
+
+            return View(model);
+        }
+
     }
 }
