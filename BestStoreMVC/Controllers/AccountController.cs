@@ -1,4 +1,5 @@
 ﻿using BestStoreMVC.Models;
+using BestStoreMVC.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +11,14 @@ namespace BestStoreMVC.Controllers
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly IConfiguration configuration;
 
         public AccountController(UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager) 
+            SignInManager<ApplicationUser> signInManager, IConfiguration configuration) 
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            this.configuration = configuration;
         }
 
         public IActionResult Register()
@@ -263,7 +266,16 @@ namespace BestStoreMVC.Controllers
                 var token = await userManager.GeneratePasswordResetTokenAsync(user);
                 string resetUrl = Url.ActionLink("ResetPassword", "Account", new { token }) ?? "URL Error";
 
-                Console.WriteLine("Password reset link: " + resetUrl);
+                // send url by email
+                string senderName = configuration["BrevoSettings:SenderName"] ?? "";
+                string senderEmail = configuration["BrevoSettings:SenderEmail"] ?? "";
+                string username = user.FirstName + " " + user.LastName;
+                string subject = "Password Reset";
+                string message = "Dear " + username + ",\n\n" +
+                                 "You can reset your password using the following link:\n\n" +
+                                 resetUrl + "\n\n" +
+                                 "Best Regards";
+                EmailSender.SendEmail(senderName, senderEmail, username, email, subject, message);
             }
 
             ViewBag.SuccessMessage = "Please check your Email account and click on the Password Reset link!";
