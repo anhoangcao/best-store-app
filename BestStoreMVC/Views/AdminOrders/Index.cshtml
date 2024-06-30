@@ -60,7 +60,8 @@
                 <td><span class="badge rounded-pill @orderBadgeColor">@order.OrderStatus</span></td>
                 <td>@order.CreatedAt.ToString("MM/dd/yyyy")</td>
                 <td>
-                    <a class="btn btn-primary btn-sm" asp-controller="AdminOrders" asp-action="Details" asp-route-id="@order.Id">Details</a>
+                    <a class="btn btn-primary btn-sm" asp-controller="AdminOrders" asp-action="Details"
+                        asp-route-id="@order.Id">Details</a>
                 </td>
             </tr>
         }

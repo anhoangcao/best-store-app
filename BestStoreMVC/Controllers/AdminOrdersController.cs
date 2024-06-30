@@ -42,5 +42,21 @@ namespace BestStoreMVC.Controllers
 
             return View();
         }
+
+        public IActionResult Details(int id)
+        {
+            var order = context.Orders.Include(o => o.Client).Include(o => o.Items)
+                .ThenInclude(oi => oi.Product).FirstOrDefault(o => o.Id == id);
+
+            if (order == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.NumOrders = context.Orders.Where(o => o.ClientId == order.ClientId).Count();
+
+
+            return View(order);
+        }
     }
 }
