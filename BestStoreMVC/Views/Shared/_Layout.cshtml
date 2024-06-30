@@ -39,9 +39,9 @@
         function saveCart(cart) {
             let cartStr = btoa(JSON.stringify(cart));
 
-            // save cookie
+            // Save cookie
             let d = new Date();
-            d.setDate(d.getDate() + 365); // this cookie expires after 365 days (1 year)
+            d.setDate(d.getDate() + 365); // Expires after 1 year
             let expires = d.toUTCString();
             document.cookie = "shopping_cart=" + cartStr + ";expires=" + expires + ";path=/; SameSite=Strict; Secure";
         }
@@ -51,7 +51,6 @@
 
             let quantity = cart[id];
             if (isNaN(quantity)) {
-                // quantity is Not a Number => set quantity to 1
                 cart[id] = 1;
             }
             else {
@@ -72,7 +71,49 @@
             document.getElementById("CartSize").innerHTML = cartSize;
         }
 
+        function increase(id) {
+            let cart = getShoppingCart();
+
+            let quantity = cart[id];
+            if (isNaN(quantity)) {
+                cart[id] = 1;
+            }
+            else {
+                cart[id] = Number(quantity) + 1;
+            }
+
+            saveCart(cart);
+            location.reload();
+        }
+
+        function decrease(id) {
+            let cart = getShoppingCart();
+
+            let quantity = cart[id];
+            if (isNaN(quantity)) {
+                return;
+            }
+
+            quantity = Number(quantity);
+
+            if (quantity > 1) {
+                cart[id] = quantity - 1;
+                saveCart(cart);
+                location.reload();
+            }
+        }
+
+        function remove(id) {
+            let cart = getShoppingCart();
+
+            if (cart[id]) {
+                delete cart[id];
+                saveCart(cart);
+                location.reload();
+            }
+        }
     </script>
+
 
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
@@ -127,6 +168,7 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" asp-area="" asp-controller="Products" asp-action="Index">Products</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="AdminOrders" asp-action="Index">Orders</a></li>
                                         <li><a class="dropdown-item" asp-area="" asp-controller="Users" asp-action="Index">Users</a></li>
                                         <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">Profile</a></li>
                                         <li><hr class="dropdown-divider"></li>
