@@ -13,7 +13,7 @@ namespace BestStoreMVC.Controllers
         private readonly decimal shippingFee;
 
         public CartController(ApplicationDbContext context, IConfiguration configuration,
-            UserManager<ApplicationUser> userManager) 
+            UserManager<ApplicationUser> userManager)
         {
             this.context = context;
             this.userManager = userManager;

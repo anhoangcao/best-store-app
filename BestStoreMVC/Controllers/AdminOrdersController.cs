@@ -55,8 +55,35 @@ namespace BestStoreMVC.Controllers
 
             ViewBag.NumOrders = context.Orders.Where(o => o.ClientId == order.ClientId).Count();
 
-
             return View(order);
+        }
+
+        public IActionResult Edit(int id, string? payment_status, string? order_status)
+        {
+            var order = context.Orders.Find(id);
+            if (order == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            if (payment_status == null && order_status == null)
+            {
+                return RedirectToAction("Details", new { id });
+            }
+
+            if (payment_status != null)
+            {
+                order.PaymentStatus = payment_status;
+            }
+
+            if (order_status != null)
+            {
+                order.OrderStatus = order_status;
+            }
+
+            context.SaveChanges();
+
+            return RedirectToAction("Details", new { id });
         }
     }
 }
