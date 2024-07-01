@@ -1,0 +1,78 @@
+﻿@{
+    
+}
+
+<h3 class="text-center mb-4">List of Orders</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Units</th>
+            <th>Total</th>
+            <th>Payment Method</th>
+            <th>Payment Status</th>
+            <th>Order Status</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Order order in ViewBag.Orders)
+        {
+            int count = 0;
+            decimal total = order.ShippingFee;
+
+            foreach (OrderItem item in order.Items)
+            {
+                count += item.Quantity;
+                total += item.Quantity * item.UnitPrice;
+            }
+
+            string paymentBadgeColor = order.PaymentStatus switch
+            {
+                "pending" => "bg-warning text-dark",
+                "accepted" => "bg-success",
+                "canceled" => "bg-secondary",
+                _ => "bg-danger"
+            };
+
+            string orderBadgeColor = order.OrderStatus switch
+            {
+                "created" => "bg-warning text-dark",
+                "accepted" => "bg-success",
+                "shipped" => "bg-primary",
+                "delivered" => "bg-success",
+                "returned" => "bg-info text-dark",
+                "canceled" => "bg-secondary",
+                "deleted" => "bg-dark",
+                _ => "bg-danger"
+            };
+
+            <tr>
+                <td>@count</td>
+                <td>@($"{total:C}")</td>
+                <td>@order.PaymentMethod</td>
+                <td><span class="badge rounded-pill @paymentBadgeColor">@order.PaymentStatus</span></td>
+                <td><span class="badge rounded-pill @orderBadgeColor">@order.OrderStatus</span></td>
+                <td>@order.CreatedAt.ToString("MM/dd/yyyy")</td>
+                <td>
+                    <a class="btn btn-primary btn-sm" asp-controller="ClientOrders" asp-action="Details"
+                       asp-route-id="@order.Id">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination">
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            string active = (i == ViewBag.PageIndex) ? "active" : "";
+
+            <li class="page-item @active">
+                <a class="page-link" asp-route-pageIndex="@i">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
