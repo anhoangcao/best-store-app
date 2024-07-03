@@ -51,8 +51,8 @@ BestStoreMVC is a comprehensive web application designed to manage a retail stor
 
 ## Interface Screenshots
 
-### Dashboard
-![Dashboard](assets/images/dashboard.png)
+### Home Page
+![Home Page]<img src="https://i.imgur.com/O2P5XjO.png">
 
 ### Product Management
 ![Product Management](assets/images/product-management.png)
